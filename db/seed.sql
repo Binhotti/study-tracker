@@ -1,1 +1,0 @@
-insert into users (name, email, password) values ('admin', 'admin@gmail.com', 'admin123')

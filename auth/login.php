@@ -9,13 +9,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $sql = "SELECT id, name, password FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
-    
+
     if (!$stmt) {
         $error = "Erro na consulta: " . $conn->error;
     } else {
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        
+
         if ($stmt->errno) {
             $error = "Erro ao executar: " . $stmt->error;
         } else {
@@ -40,23 +40,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8">
-<title>Login</title>
-<link rel="stylesheet" href="../styles.css">
+    <meta charset="utf-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
-<div class="login-container">
-  <h2>Login</h2>
-  <?php if ($error): ?>
-    <div class="error"><?= htmlspecialchars($error) ?></div>
-  <?php endif; ?>
-  <form method="post">
-    <input name="email" type="email" placeholder="Email" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-    <p>No account? <a href="register.php">Register</a></p>
-  </form>
-</div>
+    <div class="titulo">
+        <h1>Clocky</h1>
+    </div>
+    <div class="login-container">
+        <h2>Login</h2>
+        <?php if ($error): ?>
+            <div class="error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="post">
+            <input name="email" type="email" placeholder="Email" required>
+            <input name="password" type="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <p>No account? <a href="register.php">Register</a></p>
+        </form>
+    </div>
+    <div class="image-estudante">
+        <img src="../images/estudante.png" alt="">
+    </div>
 </body>
+
 </html>
