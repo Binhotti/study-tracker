@@ -1,3 +1,6 @@
+create database study_tracker;
+use study_tracker;
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150),
@@ -18,7 +21,7 @@ CREATE TABLE study_sessions (
     subject_id INT,
     start_time DATETIME,
     end_time DATETIME,
-    hours DECIMAL(5,2),
+    hours DECIMAL(10,6),
     session_date DATE,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (subject_id) REFERENCES subjects(id)

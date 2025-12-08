@@ -9,31 +9,6 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 
-$query = $conn->query("SELECT SUM(hours) AS total_hours FROM study_sessions WHERE user_id = $user_id");
-$row = $query->fetch_assoc();
-$total = $row["total_hours"] ?? 0;
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css">
-    <title>Study Tracker UI</title>
-</head>
-<body>
-
-<?php
-require_once("config/db.php");
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: auth/login.php");
-    exit;
-}
-$user_id = $_SESSION['user_id'];
-$user_name = $_SESSION['user_name'] ?? 'User';
-
 // Fetch subjects and total hours per subject
 $sql = "SELECT s.id, s.name,
        IFNULL((SELECT SUM(hours) FROM study_sessions ss WHERE ss.subject_id = s.id AND ss.user_id = ?),0) AS total_hours
@@ -58,6 +33,8 @@ $stmt3->bind_param("i", $user_id);
 $stmt3->execute();
 $row3 = $stmt3->get_result()->fetch_assoc();
 $today_total = $row3['today_total'];
+
+$user_name = $_SESSION['user_name'] ?? 'User';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -87,7 +64,13 @@ $today_total = $row3['today_total'];
 
 <div class="header">
   <div class="timer-display" id="mainTimer">00:00:00</div>
-  <div class="small">Total hoje: <strong id="todayTotal"><?= number_format($today_total,2) ?></strong> h</div>
+  <div class="small">Total hoje: <strong id="todayTotal"><?php 
+    $seconds = (int)($today_total * 3600);
+    $h = intdiv($seconds, 3600);
+    $m = intdiv($seconds % 3600, 60);
+    $s = $seconds % 60;
+    echo str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($m, 2, '0', STR_PAD_LEFT) . ':' . str_pad($s, 2, '0', STR_PAD_LEFT);
+  ?></strong></div>
 </div>
 
 <div class="list">
@@ -105,10 +88,16 @@ $today_total = $row3['today_total'];
         </div>
         <div>
           <div style="font-size:16px"><?= htmlspecialchars($s['name']) ?></div>
-          <div class="small"><?= number_format($s['total_hours'],2) ?> h</div>
+          <div class="small" id="time-<?= $s['id'] ?>"><?php 
+            $seconds = (int)($s['total_hours'] * 3600);
+            $h = intdiv($seconds, 3600);
+            $m = intdiv($seconds % 3600, 60);
+            $sec = $seconds % 60;
+            echo str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($m, 2, '0', STR_PAD_LEFT) . ':' . str_pad($sec, 2, '0', STR_PAD_LEFT);
+          ?></div>
         </div>
       </div>
-      <div class="small" id="time-<?= $s['id'] ?>">0:00:00</div>
+      <div class="small"></div>
     </div>
   <?php endforeach; ?>
 </div>
@@ -121,65 +110,139 @@ $today_total = $row3['today_total'];
 </div>
 
 <script>
-// small JS to handle start/stop
-let runningSession = <?= $running ? json_encode($running) : 'null' ?>;
+// Timer state
+let runningSession = null;
+let tickInterval = null;
+let elapsedSeconds = 0;
+let runningButton = null;
+
 const mainTimerEl = document.getElementById('mainTimer');
 const todayTotalEl = document.getElementById('todayTotal');
 
 function formatHMS(seconds) {
-  const h = Math.floor(seconds/3600), m = Math.floor((seconds%3600)/60), s = seconds%60;
-  return String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+  const h = Math.floor(seconds/3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 }
 
-let startTs = runningSession ? Date.parse("<?= $running ? $running['start_time'] : '' ?>")/1000 : null;
-let tickInterval = null;
-if (startTs) {
-  tickInterval = setInterval(()=> {
-    const now = Math.floor(Date.now()/1000);
-    mainTimerEl.textContent = formatHMS(now - startTs);
-  }, 1000);
+function stopPlayIcon() {
+  return '<svg width="16" height="16" viewBox="0 0 24 24"><rect fill="#fff" x="6" y="4" width="4" height="16"/><rect fill="#fff" x="14" y="4" width="4" height="16"/></svg>';
 }
 
-// Update per-subject totals (simple static display already from server).
-document.querySelectorAll('.play').forEach(btn => {
+function playIcon() {
+  return '<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#fff" d="M8 5v14l11-7z"/></svg>';
+}
+
+function updateTotalDisplay(newTotalSeconds) {
+  const h = Math.floor(newTotalSeconds / 3600);
+  const m = Math.floor((newTotalSeconds % 3600) / 60);
+  const s = newTotalSeconds % 60;
+  todayTotalEl.textContent = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+}
+
+// Handle play/stop buttons
+document.querySelectorAll('.play').forEach(function(btn) {
   btn.addEventListener('click', function(){
     const subjectId = this.getAttribute('data-subject');
-    if (runningSession && runningSession.subject_id == subjectId) {
-      // stop this session
-      fetch('sessions/stop.php', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: 'session_id=' + runningSession.id
-      }).then(r=>r.json()).then(data=>{
-        if (data.ok) {
-          runningSession = null;
-          startTs = null;
-          mainTimerEl.textContent = "00:00:00";
-          if (tickInterval) clearInterval(tickInterval);
-          // reload to refresh totals
-          location.reload();
-        } else alert(data.error || 'Error stopping');
-      });
+    const self = this;
+    
+    console.log('Button clicked for subject:', subjectId, 'Running session:', runningSession);
+    
+    // Se já tem uma sessão rodando
+    if (runningSession) {
+      // Se é o mesmo botão, para
+      if (runningSession.subject_id == subjectId) {
+        console.log('Stopping session with elapsed:', elapsedSeconds, 'seconds');
+        // STOP
+        fetch('sessions/stop.php', {
+          method: 'POST',
+          headers: {'Content-Type':'application/x-www-form-urlencoded'},
+          body: 'session_id=' + runningSession.id + '&elapsed_seconds=' + elapsedSeconds
+        }).then(r=>r.json()).then(data=>{
+          console.log('Stop response:', data);
+          if (data.ok) {
+            // Para o intervalo
+            if (tickInterval) clearInterval(tickInterval);
+            
+            // Remove visual do botão
+            if (runningButton) {
+              runningButton.classList.remove('playing');
+              runningButton.innerHTML = playIcon();
+            }
+            
+            // Parse current total from todayTotalEl
+            const totalText = todayTotalEl.textContent;
+            const [h, m, s] = totalText.split(':').map(Number);
+            const currentTotalSeconds = h * 3600 + m * 60 + s;
+            
+            // Add the new elapsed seconds to the total
+            const newTotalSeconds = currentTotalSeconds + elapsedSeconds;
+            
+            // Update display
+            updateTotalDisplay(newTotalSeconds);
+            
+            // Update subject time
+            const subjectTimeEl = document.getElementById('time-' + subjectId);
+            if (subjectTimeEl) {
+              const subjectText = subjectTimeEl.textContent;
+              const [sh, sm, ss] = subjectText.split(':').map(Number);
+              const currentSubjectSeconds = sh * 3600 + sm * 60 + ss;
+              const newSubjectSeconds = currentSubjectSeconds + elapsedSeconds;
+              const sh2 = Math.floor(newSubjectSeconds / 3600);
+              const sm2 = Math.floor((newSubjectSeconds % 3600) / 60);
+              const ss2 = newSubjectSeconds % 60;
+              subjectTimeEl.textContent = String(sh2).padStart(2,'0') + ":" + String(sm2).padStart(2,'0') + ":" + String(ss2).padStart(2,'0');
+            }
+            
+            // Reset
+            runningSession = null;
+            elapsedSeconds = 0;
+            mainTimerEl.textContent = "00:00:00";
+            runningButton = null;
+            
+            console.log('Session stopped and data updated.');
+          } else {
+            alert(data.error || 'Erro ao parar sessão');
+          }
+        }).catch(e => console.error('Erro:', e));
+      } else {
+        alert('Já existe uma sessão em andamento. Encerre-a primeiro.');
+      }
     } else {
-      // start new session
+      console.log('Starting new session');
+      // START new session
       fetch('sessions/start.php', {
         method: 'POST',
         headers: {'Content-Type':'application/x-www-form-urlencoded'},
         body: 'subject_id=' + subjectId
       }).then(r=>r.json()).then(data=>{
+        console.log('Start response:', data);
         if (data.ok) {
-          runningSession = {id: data.session_id, subject_id: parseInt(subjectId)};
-          startTs = Math.floor(Date.parse(data.start_time)/1000);
+          runningSession = {
+            id: data.session_id,
+            subject_id: parseInt(subjectId)
+          };
+          
+          // Update button visually
+          runningButton = self;
+          runningButton.classList.add('playing');
+          runningButton.innerHTML = stopPlayIcon();
+          
+          // Reset counter e comça a contar
+          elapsedSeconds = 0;
           mainTimerEl.textContent = "00:00:00";
+          
           if (tickInterval) clearInterval(tickInterval);
-          tickInterval = setInterval(()=> {
-            const now = Math.floor(Date.now()/1000);
-            mainTimerEl.textContent = formatHMS(now - startTs);
+          tickInterval = setInterval(() => {
+            elapsedSeconds++;
+            mainTimerEl.textContent = formatHMS(elapsedSeconds);
+            console.log('Elapsed:', elapsedSeconds);
           }, 1000);
         } else {
-          alert(data.error || 'Error starting');
+          alert(data.error || 'Erro ao iniciar sessão');
         }
-      });
+      }).catch(e => console.error('Erro:', e));
     }
   });
 });
