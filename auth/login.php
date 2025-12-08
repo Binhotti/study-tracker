@@ -1,66 +1,62 @@
 <?php
 session_start();
-require_once("../config/db.php");
+require_once "../config/db.php";
 
 $error = "";
-
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = trim($_POST["email"]);
-    $password = trim($_POST["password"]);
+    $email = trim($_POST['email']);
+    $pass = $_POST['password'];
 
-    // Query user
-    $stmt = $pdo->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-
-    if ($stmt->rowCount() === 1) {
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (password_verify($password, $user["password"])) {
-            // login OK
-            $_SESSION["user_id"] = $user["id"];
-            $_SESSION["user_name"] = $user["name"];
-
-            header("Location: ../index.php");
-            exit;
-        } else {
-            $error = "Senha incorreta!";
-        }
+    $sql = "SELECT id, name, password FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        $error = "Erro na consulta: " . $conn->error;
     } else {
-        $error = "Email não encontrado!";
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        
+        if ($stmt->errno) {
+            $error = "Erro ao executar: " . $stmt->error;
+        } else {
+            $res = $stmt->get_result();
+
+            if ($res->num_rows === 1) {
+                $user = $res->fetch_assoc();
+                if (password_verify($pass, $user['password'])) {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    header("Location: ../index.php");
+                    exit;
+                } else {
+                    $error = "Senha errada";
+                }
+            } else {
+                $error = "Email não encontrado. (Linhas encontradas: " . $res->num_rows . ")";
+            }
+        }
     }
 }
 ?>
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="../styles.css">
+<meta charset="utf-8">
+<title>Login</title>
+<link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-
 <div class="login-container">
-    <h2>Entrar</h2>
-
-    <?php if ($error): ?>
-        <p class="error"><?= $error ?></p>
-    <?php endif; ?>
-
-    <form method="POST">
-        <label>Email</label>
-        <input type="email" name="email" required>
-
-        <label>Senha</label>
-        <input type="password" name="password" required>
-
-        <button type="submit">Login</button>
-
-        <p class="register-link">
-            Não tem conta? <a href="register.php">Registrar</a>
-        </p>
-    </form>
+  <h2>Login</h2>
+  <?php if ($error): ?>
+    <div class="error"><?= htmlspecialchars($error) ?></div>
+  <?php endif; ?>
+  <form method="post">
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="password" type="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+    <p>No account? <a href="register.php">Register</a></p>
+  </form>
 </div>
-
 </body>
 </html>

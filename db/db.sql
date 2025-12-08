@@ -23,3 +23,5 @@ CREATE TABLE study_sessions (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
+
+insert into users (name, email, password) values ('admin', 'admin@gmail.com', '$2y$10$4QmeYOdvN2MkV56EVx6snOTeH6U2o4mHID07OAcw1QwOG0ITpZUre');
