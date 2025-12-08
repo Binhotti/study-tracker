@@ -14,9 +14,89 @@ $row = $query->fetch_assoc();
 $total = $row["total_hours"] ?? 0;
 ?>
 
-<h1>Study Tracker</h1>
-<p>Total study hours: <strong><?php echo $total; ?></strong></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <title>Study Tracker UI</title>
+</head>
+<body>
+    <div class="header">
+        <div>seg., 08/12</div>
+        <div class="timer-display">0:59:43</div>
+        <div class="subtitle">Descanso 16m 8s</div>
+    </div>
 
-<a href="subjects/list.php">Subjects</a><br>
-<a href="sessions/list.php">Study Sessions</a><br>
-<a href="auth/logout.php">Logout</a>
+    <div class="tab-menu">
+        <div class="tab-active">Timer</div>
+        <div>Livros</div>
+        <div>Insights</div>
+        <div>Agenda</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn"></div>
+            backend
+        </div>
+        <div class="task-time">0:59:43</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn orange"></div>
+            Automação de IA
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn orange"></div>
+            projeto
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn pink"></div>
+            Context API
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn orange"></div>
+            react
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn orange"></div>
+            typescript
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="task">
+        <div class="task-name">
+            <div class="play-btn orange"></div>
+            redux
+        </div>
+        <div class="task-time">0:00:00</div>
+    </div>
+
+    <div class="bottom-menu">
+        <div class="bottom-item active">Início</div>
+        <div class="bottom-item">Grupos</div>
+        <div class="bottom-item">Ver Mais</div>
+    </div>
+</body>
+</html>
+
