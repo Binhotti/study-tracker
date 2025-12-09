@@ -43,7 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
     <meta charset="utf-8">
-    <title>Login</title>
+    <title>Clocky - Login</title>
+    <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="../styles.css">
 </head>
 
@@ -58,9 +59,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php endif; ?>
         <form method="post">
             <input name="email" type="email" placeholder="Email" required>
-            <input name="password" type="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-            <p>No account? <a href="register.php">Register</a></p>
+            <input name="password" type="password" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+            <p>Não tem conta? <a href="register.php">Registrar</a></p>
         </form>
     </div>
     <div class="image-estudante">

@@ -44,7 +44,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
   <meta charset="utf-8">
-  <title>Register</title>
+  <title>Clocky - Register</title>
+  <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon">
   <link rel="stylesheet" href="../styles.css">
 </head>
 
@@ -53,16 +54,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a href="../index.php">Voltar</a>
   </div>
   <div class="login-container">
-    <h2>Create account</h2>
+    <h2>Criar Conta</h2>
     <?php if ($error): ?>
       <div class="error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <form method="post">
-      <input name="name" placeholder="Name" required>
+      <input name="name" placeholder="Nome" required>
       <input name="email" type="email" placeholder="Email" required>
-      <input name="password" type="password" placeholder="Password" required>
-      <button type="submit">Register</button>
-      <p>Have account? <a href="login.php">Login</a></p>
+      <input name="password" type="password" placeholder="Senha" required>
+      <button type="submit">Registrar</button>
     </form>
   </div>
 </body>
