@@ -252,7 +252,12 @@
 
  .timer-display {
      font-size: 48px;
-     font-weight: 700;
+     font-weight: 400;
+ }
+
+ .timer-display p {
+     font-size: 55px;
+     font-weight: 400;
  }
 
  .list {
