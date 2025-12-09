@@ -1,7 +1,7 @@
  body {
      background-color: #0f0f0f;
      color: white;
-     font-family: Arial, sans-serif;
+     font-family: 'Jersey 10', sans-serif;
      margin: 0;
      padding: 0;
  }
@@ -11,9 +11,9 @@
      padding: 20px 0;
  }
 
- .timer-display {
+ .timer-display p {
      font-size: 64px;
-     font-weight: bold;
+     font-weight: 400;
      text-align: center;
      margin-top: 10px;
  }
@@ -110,13 +110,12 @@
      position: relative;
      overflow: hidden;
      z-index: 2;
-     /* keep card above decorative image */
  }
 
  .login-container h2 {
      color: #fff;
      margin-bottom: 10px;
-     font-size: 22px;
+     font-size: 38px;
      letter-spacing: 0.6px;
  }
 
@@ -174,6 +173,11 @@
      font-weight: 600;
  }
 
+ .login-container p {
+     color: #b3b3b3;
+     font-size: 24px;
+ }
+
  .login-container input:focus {
      border-color: #3a47d5;
      box-shadow: 0 8px 30px rgba(58, 71, 213, 0.10);
@@ -182,17 +186,17 @@
  .image-estudante {
      position: fixed;
      pointer-events: none;
+     margin-bottom: -40px;
+     bottom: 30px;
      z-index: 0;
  }
 
  .image-estudante img {
-     margin-bottom: 100px;
-     height: 300px;
+     height: 400px;
  }
 
  .titulo h1 {
-     font-family: 'Kanit', sans-serif;
-     font-size: 48px;
+     font-size: 80px;
      margin: 20px 0 6px;
      font-weight: 900;
      letter-spacing: 0.8px;
@@ -241,8 +245,6 @@
      }
  }
 
-
- /* Dashboard specific styles */
  .header {
      text-align: center;
      padding: 18px 0;
@@ -295,7 +297,7 @@
 
  .small {
      color: #b3b3b3;
-     font-size: 13px;
+     font-size: 24px;
  }
 
  .topbar {
@@ -333,12 +335,12 @@
  }
 
  .logout {
-     font-size: 14px;
      cursor: pointer;
      user-select: none;
  }
 
  .logout a {
+     font-size: 24px;
      color: #d62839;
      text-decoration: none;
  }
@@ -388,13 +390,15 @@
  }
 
  .edit-container h2 {
+     font-size: 32px;
+     font-weight: 400;
      margin: 0 0 12px 0;
      color: #fff;
  }
 
  .edit-container label {
      color: #bdbdbd;
-     font-size: 14px;
+     font-size: 20px;
      display: block;
      margin-bottom: 6px;
  }

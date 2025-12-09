@@ -61,20 +61,25 @@ $weekday = $days[date('w')]; // 0 = domingo, 6 = sábado
     <title>Clocky</title>
     <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jersey+10&family=Josefin+Sans:ital,wght@0,700;1,700&family=Pixelify+Sans:wght@400..700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
     <div class="topbar">
         <div style="color:#b3b3b3"><?= $weekday ?> <?= date('d/m') ?>
         </div>
-        <div style="color:#; font-size:24px">Bem vindo, <?= htmlspecialchars($user_name) ?>! </div>
+        <div style="color:#; font-size:38px">Bem vindo, <?= htmlspecialchars($user_name) ?>! </div>
         <div class="logout">
             <a href="auth/logout.php">Sair</a>
         </div>
     </div>
 
     <div class="header">
-        <div class="timer-display" id="mainTimer">00:00:00</div>
+        <div class="timer-display" id="mainTimer"><p>00:00:00</p></div>
         <div class="small">Total hoje: <strong id="todayTotal"><?php
         $seconds = (int) ($today_total * 3600);
 
@@ -109,7 +114,7 @@ $weekday = $days[date('w')]; // 0 = domingo, 6 = sábado
                     </div>
 
                     <div>
-                        <div style="font-size:16px"><?= htmlspecialchars($s['name']) ?></div>
+                        <div style="font-size:24px"><?= htmlspecialchars($s['name']) ?></div>
                         <div class="small" id="time-<?= $s['id'] ?>">
                             <?php
                             $seconds = (int) ($s['total_hours'] * 3600);
